@@ -2,20 +2,22 @@
   <h1>DonateHub - Gestion des Dons</h1>
 
   <!-- Formulaire d'ajout -->
-  <div class="form-container">
+  <div class="card">
     <h2>Ajouter un nouvel objet</h2>
     <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <input type="text" formControlName="title" placeholder="Titre" required>
+      <div class="form-grid">
+        <div class="form-group">
+          <input type="text" formControlName="title" placeholder="Titre" required>
+        </div>
+        <div class="form-group">
+          <input type="text" formControlName="category" placeholder="Catégorie" required>
+        </div>
+        <div class="form-group">
+          <input type="text" formControlName="city" placeholder="Ville" required>
+        </div>
       </div>
       <div class="form-group">
         <textarea formControlName="description" placeholder="Description" required></textarea>
-      </div>
-      <div class="form-group">
-        <input type="text" formControlName="category" placeholder="Catégorie" required>
-      </div>
-      <div class="form-group">
-        <input type="text" formControlName="city" placeholder="Ville" required>
       </div>
       <button type="submit" [disabled]="itemForm.invalid" class="btn-submit">Publier le don</button>
     </form>
@@ -23,11 +25,33 @@
 
   <hr>
 
+  <!-- Filtres et Recherche -->
+  <div class="filters-container card">
+    <h2>Rechercher un don</h2>
+    <form [formGroup]="filterForm" class="filter-grid">
+      <div class="form-group">
+        <input type="text" formControlName="search" placeholder="Rechercher par titre...">
+      </div>
+      <div class="form-group">
+        <select formControlName="category">
+          <option value="">Toutes les catégories</option>
+          <option *ngFor="let cat of categories()" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <select formControlName="city">
+          <option value="">Toutes les villes</option>
+          <option *ngFor="let city of cities()" [value]="city">{{ city }}</option>
+        </select>
+      </div>
+    </form>
+  </div>
+
   <!-- Liste des objets -->
   <div class="list-container">
-    <h2>Dons disponibles</h2>
-    <div *ngIf="items().length > 0; else noItems">
-      <div class="item-card" *ngFor="let item of items()">
+    <h2>Dons disponibles ({{ filteredItems().length }})</h2>
+    <div *ngIf="filteredItems().length > 0; else noItems">
+      <div class="item-card" *ngFor="let item of filteredItems()">
         <div class="item-content">
           <h3>{{ item.title }}</h3>
           <p><strong>Description:</strong> {{ item.description }}</p>
@@ -44,7 +68,9 @@
   </div>
 
   <ng-template #noItems>
-    <p>Aucun objet disponible pour le moment.</p>
+    <div class="no-results">
+      <p>Aucun objet ne correspond à vos critères.</p>
+    </div>
   </ng-template>
 </div>
 
