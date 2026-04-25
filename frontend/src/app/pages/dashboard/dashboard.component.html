@@ -1,0 +1,125 @@
+<div class="app-wrapper">
+  <!-- Navbar simplifiée -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">Donate<span>Hub</span></div>
+      <div class="user-actions">
+        <span class="user-name">👤 {{ authService.currentUser()?.name }}</span>
+        <button (click)="logout()" class="btn-logout">Déconnexion</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="container-fluid">
+      <div class="layout-grid">
+        
+        <!-- Colonne GAUCHE : Formulaire & Filtres -->
+        <aside class="sidebar">
+          <section class="card publish-section">
+            <h2 class="section-title">✨ Publier un don</h2>
+            <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+              <div class="form-group">
+                <label>Que voulez-vous donner ?</label>
+                <input type="text" formControlName="title" placeholder="Ex: Vélo VTT, Lampe de bureau..." required>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Catégorie</label>
+                  <select formControlName="category" required>
+                    <option value="" disabled selected>Choisir...</option>
+                    <option value="Meubles">Meubles</option>
+                    <option value="Électronique">Électronique</option>
+                    <option value="Vêtements">Vêtements</option>
+                    <option value="Livres">Livres</option>
+                    <option value="Sport">Sport</option>
+                    <option value="Autre">Autre</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Ville</label>
+                  <select formControlName="city" required>
+                    <option value="" disabled selected>Choisir...</option>
+                    <option *ngFor="let city of moroccanCities" [value]="city">{{ city }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Description</label>
+                <textarea formControlName="description" placeholder="État, dimensions, détails utiles..." required></textarea>
+              </div>
+              
+              <button type="submit" [disabled]="itemForm.invalid" class="btn-primary full-width">
+                <span>➕</span> Publier le don
+              </button>
+            </form>
+          </section>
+
+          <section class="card filters-section">
+            <h2 class="section-title">🔍 Rechercher</h2>
+            <form [formGroup]="filterForm" class="filter-form">
+              <div class="form-group">
+                <input type="text" formControlName="search" placeholder="Titre de l'objet...">
+              </div>
+              <div class="form-group">
+                <select formControlName="category">
+                  <option value="">Toutes les catégories</option>
+                  <option *ngFor="let cat of categories()" [value]="cat">{{ cat }}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <select formControlName="city">
+                  <option value="">Toutes les villes</option>
+                  <option *ngFor="let city of moroccanCities" [value]="city">{{ city }}</option>
+                </select>
+              </div>
+            </form>
+          </section>
+        </aside>
+
+        <!-- Colonne DROITE : Liste des Objets -->
+        <section class="items-display">
+          <div class="list-header">
+            <h2 class="list-title">📦 Derniers dons au Maroc</h2>
+            <div class="badge-count">{{ filteredItems().length }} objets trouvés</div>
+          </div>
+
+          <div *ngIf="filteredItems().length > 0; else noItems" class="marketplace-grid">
+            <div class="marketplace-card" *ngFor="let item of filteredItems(); let i = index" [style.animation-delay]="i * 0.1 + 's'">
+              <div class="card-image-placeholder">
+                <span class="category-icon">{{ item.category === 'Meubles' ? '🪑' : item.category === 'Livres' ? '📚' : item.category === 'Sport' ? '🚲' : '🎁' }}</span>
+                <div [class]="'status-badge ' + item.status.toLowerCase()">{{ item.status }}</div>
+              </div>
+              
+              <div class="card-body">
+                <h3 class="card-title">{{ item.title }}</h3>
+                <p class="card-location">📍 {{ item.city }}</p>
+                <p class="card-text">{{ item.description }}</p>
+                
+                <div class="card-footer">
+                  <button (click)="changeStatus(item.id, item.status)" class="btn-outline btn-sm">
+                    🔄 Statut
+                  </button>
+                  <button (click)="deleteItem(item.id)" class="btn-danger-outline btn-sm">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noItems>
+            <div class="empty-state card">
+              <div class="empty-icon">🔭</div>
+              <h3>Aucun résultat trouvé</h3>
+              <p>Essayez de modifier vos filtres ou de publier un nouveau don !</p>
+            </div>
+          </ng-template>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>

@@ -2,10 +2,12 @@ package com.donatehub.config;
 
 import com.donatehub.models.DonationItem;
 import com.donatehub.models.ItemStatus;
+import com.donatehub.models.Role;
 import com.donatehub.models.User;
 import com.donatehub.repositories.DonationItemRepository;
 import com.donatehub.repositories.UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -15,10 +17,12 @@ public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final DonationItemRepository itemRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataSeeder(UserRepository userRepository, DonationItemRepository itemRepository) {
+    public DataSeeder(UserRepository userRepository, DonationItemRepository itemRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -30,8 +34,13 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedData() {
         // Create Users
-        User user1 = new User(null, "Alice Smith", "alice@example.com", "Paris");
-        User user2 = new User(null, "Bob Johnson", "bob@example.com", "Lyon");
+        User user1 = new User(null, "Alice", "alice@example.com", "Casablanca", passwordEncoder.encode("password123"));
+        user1.getRoles().add(Role.USER);
+
+        User user2 = new User(null, "Bob", "bob@example.com", "Rabat", passwordEncoder.encode("password123"));
+        user2.getRoles().add(Role.USER);
+        user2.getRoles().add(Role.ADMIN);
+        
         userRepository.saveAll(Arrays.asList(user1, user2));
 
         // Create Items for Alice

@@ -20,17 +20,26 @@ public class User {
 
     private String city;
 
+    @Column(nullable = false)
+    private String password;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    private java.util.Set<Role> roles = new java.util.HashSet<>();
+
     @JsonManagedReference
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<DonationItem> items;
 
     public User() {}
 
-    public User(Long id, String name, String email, String city) {
+    public User(Long id, String name, String email, String city, String password) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.city = city;
+        this.password = password;
     }
 
     public Long getId() { return id; }
@@ -41,6 +50,10 @@ public class User {
     public void setEmail(String email) { this.email = email; }
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public java.util.Set<Role> getRoles() { return roles; }
+    public void setRoles(java.util.Set<Role> roles) { this.roles = roles; }
     public List<DonationItem> getItems() { return items; }
     public void setItems(List<DonationItem> items) { this.items = items; }
 }

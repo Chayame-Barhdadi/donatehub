@@ -1,0 +1,33 @@
+<div class="auth-wrapper">
+  <div class="auth-card card">
+    <div class="auth-header">
+      <div class="logo">Donate<span>Hub</span></div>
+      <h2>Ravie de vous revoir !</h2>
+      <p>Connectez-vous pour continuer à partager.</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="votre@email.com" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" formControlName="password" placeholder="••••••••" required>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-msg">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" [disabled]="loginForm.invalid || loading" class="btn-primary full-width">
+        {{ loading ? 'Connexion en cours...' : 'Se connecter' }}
+      </button>
+
+      <div class="auth-footer">
+        Pas encore de compte ? <a routerLink="/register">S'inscrire</a>
+      </div>
+    </form>
+  </div>
+</div>

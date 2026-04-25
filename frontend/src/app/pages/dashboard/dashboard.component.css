@@ -1,0 +1,27 @@
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-logout:hover {
+  background: #f1f5f9;
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}

@@ -1,0 +1,46 @@
+<div class="auth-wrapper">
+  <div class="auth-card card">
+    <div class="auth-header">
+      <div class="logo">Donate<span>Hub</span></div>
+      <h2>Rejoignez-nous !</h2>
+      <p>Créez un compte pour commencer à donner.</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label>Nom complet</label>
+        <input type="text" formControlName="name" placeholder="John Doe" required>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="votre@email.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>Ville</label>
+        <select formControlName="city" required>
+          <option value="" disabled selected>Choisir votre ville...</option>
+          <option *ngFor="let city of moroccanCities" [value]="city">{{ city }}</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" formControlName="password" placeholder="Min. 6 caractères" required>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-msg">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" [disabled]="registerForm.invalid || loading" class="btn-primary full-width">
+        {{ loading ? 'Création en cours...' : "S'inscrire" }}
+      </button>
+
+      <div class="auth-footer">
+        Déjà un compte ? <a routerLink="/login">Se connecter</a>
+      </div>
+    </form>
+  </div>
+</div>
