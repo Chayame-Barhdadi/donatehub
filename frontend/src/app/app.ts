@@ -15,6 +15,12 @@ import { DonationItem } from './models/donation-item.model';
 export class App implements OnInit {
   protected readonly title = signal('DonateHub');
   
+  // Moroccan Cities
+  moroccanCities = [
+    'Casablanca', 'Rabat', 'Marrakech', 'Fès', 'Tanger', 
+    'Agadir', 'Meknès', 'Oujda', 'Kenitra', 'Tétouan'
+  ];
+
   // State signals
   items = signal<DonationItem[]>([]);
   searchTerm = signal<string>('');
@@ -31,8 +37,8 @@ export class App implements OnInit {
     });
   });
 
+  // Unique categories from actual items
   categories = computed(() => [...new Set(this.items().map(item => item.category))]);
-  cities = computed(() => [...new Set(this.items().map(item => item.city))]);
 
   // Forms
   itemForm: FormGroup;
@@ -43,7 +49,7 @@ export class App implements OnInit {
     private fb: FormBuilder
   ) {
     this.itemForm = this.fb.group({
-      title: ['', Validators.required],
+      title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', Validators.required],
       category: ['', Validators.required],
       city: ['', Validators.required]
