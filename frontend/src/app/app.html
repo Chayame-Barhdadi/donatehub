@@ -1,0 +1,19 @@
+<div class="container">
+  <h1>DonateHub - Liste des Objets</h1>
+
+  <div *ngIf="items().length > 0; else noItems">
+    <div class="item-card" *ngFor="let item of items()">
+      <h3>{{ item.title }}</h3>
+      <p><strong>Description:</strong> {{ item.description }}</p>
+      <p><strong>Catégorie:</strong> {{ item.category }}</p>
+      <p><strong>Ville:</strong> {{ item.city }}</p>
+      <p><strong>Statut:</strong> <span [class]="'status-' + item.status.toLowerCase()">{{ item.status }}</span></p>
+    </div>
+  </div>
+
+  <ng-template #noItems>
+    <p>Aucun objet disponible pour le moment.</p>
+  </ng-template>
+</div>
+
+<router-outlet />
