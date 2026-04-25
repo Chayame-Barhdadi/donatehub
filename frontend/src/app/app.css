@@ -1,21 +1,68 @@
 .container {
   max-width: 800px;
   margin: 20px auto;
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
 }
 
-h1 {
+h1, h2 {
   color: #2c3e50;
   text-align: center;
 }
 
+.form-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+textarea {
+  height: 80px;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 10px;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-submit:disabled {
+  background-color: #95a5a6;
+}
+
 .item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 15px;
+  padding: 20px;
   margin-bottom: 15px;
-  background-color: #f9f9f9;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: #fdfdfd;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.item-content {
+  flex: 1;
 }
 
 .item-card h3 {
@@ -23,6 +70,40 @@ h1 {
   color: #2980b9;
 }
 
-.status-available { color: green; font-weight: bold; }
-.status-reserved { color: orange; font-weight: bold; }
-.status-given { color: gray; font-weight: bold; }
+.item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-status {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-delete {
+  background-color: #e74c3c;
+  color: white;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.status-available { color: #27ae60; font-weight: bold; }
+.status-reserved { color: #f39c12; font-weight: bold; }
+.status-given { color: #7f8c8d; font-weight: bold; }
+
+hr {
+  margin: 40px 0;
+  border: 0;
+  border-top: 1px solid #eee;
+}

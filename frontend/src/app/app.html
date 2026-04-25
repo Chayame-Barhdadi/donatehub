@@ -1,13 +1,45 @@
 <div class="container">
-  <h1>DonateHub - Liste des Objets</h1>
+  <h1>DonateHub - Gestion des Dons</h1>
 
-  <div *ngIf="items().length > 0; else noItems">
-    <div class="item-card" *ngFor="let item of items()">
-      <h3>{{ item.title }}</h3>
-      <p><strong>Description:</strong> {{ item.description }}</p>
-      <p><strong>Catégorie:</strong> {{ item.category }}</p>
-      <p><strong>Ville:</strong> {{ item.city }}</p>
-      <p><strong>Statut:</strong> <span [class]="'status-' + item.status.toLowerCase()">{{ item.status }}</span></p>
+  <!-- Formulaire d'ajout -->
+  <div class="form-container">
+    <h2>Ajouter un nouvel objet</h2>
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <input type="text" formControlName="title" placeholder="Titre" required>
+      </div>
+      <div class="form-group">
+        <textarea formControlName="description" placeholder="Description" required></textarea>
+      </div>
+      <div class="form-group">
+        <input type="text" formControlName="category" placeholder="Catégorie" required>
+      </div>
+      <div class="form-group">
+        <input type="text" formControlName="city" placeholder="Ville" required>
+      </div>
+      <button type="submit" [disabled]="itemForm.invalid" class="btn-submit">Publier le don</button>
+    </form>
+  </div>
+
+  <hr>
+
+  <!-- Liste des objets -->
+  <div class="list-container">
+    <h2>Dons disponibles</h2>
+    <div *ngIf="items().length > 0; else noItems">
+      <div class="item-card" *ngFor="let item of items()">
+        <div class="item-content">
+          <h3>{{ item.title }}</h3>
+          <p><strong>Description:</strong> {{ item.description }}</p>
+          <p><strong>Catégorie:</strong> {{ item.category }}</p>
+          <p><strong>Ville:</strong> {{ item.city }}</p>
+          <p><strong>Statut:</strong> <span [class]="'status-' + item.status.toLowerCase()">{{ item.status }}</span></p>
+        </div>
+        <div class="item-actions">
+          <button (click)="changeStatus(item.id, item.status)" class="btn-status">Changer Statut</button>
+          <button (click)="deleteItem(item.id)" class="btn-delete">Supprimer</button>
+        </div>
+      </div>
     </div>
   </div>
 
