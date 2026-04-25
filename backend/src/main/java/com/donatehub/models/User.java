@@ -1,8 +1,6 @@
 package com.donatehub.models;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.List;
 
 @Entity

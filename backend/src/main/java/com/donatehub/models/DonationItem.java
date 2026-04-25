@@ -1,7 +1,6 @@
 package com.donatehub.models;
 
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "items")
