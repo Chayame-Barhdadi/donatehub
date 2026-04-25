@@ -1,77 +1,100 @@
 <div class="container">
-  <h1>DonateHub - Gestion des Dons</h1>
+  <header class="header">
+    <h1>DonateHub</h1>
+    <p>Donnez une seconde vie à vos objets, faites un geste pour la planète.</p>
+  </header>
 
-  <!-- Formulaire d'ajout -->
-  <div class="card">
-    <h2>Ajouter un nouvel objet</h2>
-    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-      <div class="form-grid">
-        <div class="form-group">
-          <input type="text" formControlName="title" placeholder="Titre" required>
-        </div>
-        <div class="form-group">
-          <input type="text" formControlName="category" placeholder="Catégorie" required>
-        </div>
-        <div class="form-group">
-          <input type="text" formControlName="city" placeholder="Ville" required>
+  <div class="main-grid">
+    <!-- Sidebar: Formulaire d'ajout -->
+    <aside class="sidebar">
+      <div class="card">
+        <h2 class="section-title">✨ Publier un don</h2>
+        <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label>Titre de l'objet</label>
+            <input type="text" formControlName="title" placeholder="Ex: Table en bois" required>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Catégorie</label>
+              <input type="text" formControlName="category" placeholder="Meubles, Électro..." required>
+            </div>
+            <div class="form-group">
+              <label>Ville</label>
+              <input type="text" formControlName="city" placeholder="Ex: Paris" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea formControlName="description" placeholder="Détails sur l'état de l'objet..." required></textarea>
+          </div>
+          <button type="submit" [disabled]="itemForm.invalid" class="btn-submit">
+            Publier maintenant
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Main Content: Filtres et Liste -->
+    <main class="content">
+      <!-- Filtres -->
+      <div class="filters-container card">
+        <h2 class="section-title">🔍 Rechercher un don</h2>
+        <form [formGroup]="filterForm" class="filter-grid">
+          <input type="text" formControlName="search" placeholder="Rechercher par titre...">
+          <select formControlName="category">
+            <option value="">Toutes les catégories</option>
+            <option *ngFor="let cat of categories()" [value]="cat">{{ cat }}</option>
+          </select>
+          <select formControlName="city">
+            <option value="">Toutes les villes</option>
+            <option *ngFor="let city of cities()" [value]="city">{{ city }}</option>
+          </select>
+        </form>
+      </div>
+
+      <!-- Liste des objets -->
+      <div class="item-list-header">
+        <h2 class="section-title">📦 Objets disponibles</h2>
+        <span class="item-count">{{ filteredItems().length }} objets</span>
+      </div>
+
+      <div *ngIf="filteredItems().length > 0; else noItems" class="items-grid">
+        <div class="item-card" *ngFor="let item of filteredItems(); let i = index" [style.animation-delay]="i * 0.1 + 's'">
+          <span [class]="'item-badge status-' + item.status.toLowerCase()">
+            {{ item.status }}
+          </span>
+          <h3 class="item-title">{{ item.title }}</h3>
+          <p class="item-desc">{{ item.description }}</p>
+          
+          <div class="item-meta">
+            <div class="meta-info">
+              <span>📂</span> {{ item.category }}
+            </div>
+            <div class="meta-info">
+              <span>📍</span> {{ item.city }}
+            </div>
+          </div>
+
+          <div class="item-actions">
+            <button (click)="changeStatus(item.id, item.status)" class="btn-action btn-status">
+              🔄 Changer statut
+            </button>
+            <button (click)="deleteItem(item.id)" class="btn-action btn-delete">
+              🗑️ Supprimer
+            </button>
+          </div>
         </div>
       </div>
-      <div class="form-group">
-        <textarea formControlName="description" placeholder="Description" required></textarea>
-      </div>
-      <button type="submit" [disabled]="itemForm.invalid" class="btn-submit">Publier le don</button>
-    </form>
+
+      <ng-template #noItems>
+        <div class="no-results">
+          <i>🔭</i>
+          <p>Aucun objet ne correspond à votre recherche pour le moment.</p>
+        </div>
+      </ng-template>
+    </main>
   </div>
-
-  <hr>
-
-  <!-- Filtres et Recherche -->
-  <div class="filters-container card">
-    <h2>Rechercher un don</h2>
-    <form [formGroup]="filterForm" class="filter-grid">
-      <div class="form-group">
-        <input type="text" formControlName="search" placeholder="Rechercher par titre...">
-      </div>
-      <div class="form-group">
-        <select formControlName="category">
-          <option value="">Toutes les catégories</option>
-          <option *ngFor="let cat of categories()" [value]="cat">{{ cat }}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <select formControlName="city">
-          <option value="">Toutes les villes</option>
-          <option *ngFor="let city of cities()" [value]="city">{{ city }}</option>
-        </select>
-      </div>
-    </form>
-  </div>
-
-  <!-- Liste des objets -->
-  <div class="list-container">
-    <h2>Dons disponibles ({{ filteredItems().length }})</h2>
-    <div *ngIf="filteredItems().length > 0; else noItems">
-      <div class="item-card" *ngFor="let item of filteredItems()">
-        <div class="item-content">
-          <h3>{{ item.title }}</h3>
-          <p><strong>Description:</strong> {{ item.description }}</p>
-          <p><strong>Catégorie:</strong> {{ item.category }}</p>
-          <p><strong>Ville:</strong> {{ item.city }}</p>
-          <p><strong>Statut:</strong> <span [class]="'status-' + item.status.toLowerCase()">{{ item.status }}</span></p>
-        </div>
-        <div class="item-actions">
-          <button (click)="changeStatus(item.id, item.status)" class="btn-status">Changer Statut</button>
-          <button (click)="deleteItem(item.id)" class="btn-delete">Supprimer</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <ng-template #noItems>
-    <div class="no-results">
-      <p>Aucun objet ne correspond à vos critères.</p>
-    </div>
-  </ng-template>
 </div>
 
 <router-outlet />
