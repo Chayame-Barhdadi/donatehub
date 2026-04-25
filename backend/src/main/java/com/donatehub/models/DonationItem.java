@@ -1,5 +1,6 @@
 package com.donatehub.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -23,6 +24,7 @@ public class DonationItem {
     @Enumerated(EnumType.STRING)
     private ItemStatus status;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

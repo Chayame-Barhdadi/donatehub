@@ -1,5 +1,6 @@
 package com.donatehub.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class User {
 
     private String city;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<DonationItem> items;
 
