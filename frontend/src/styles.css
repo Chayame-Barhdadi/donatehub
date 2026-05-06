@@ -1,19 +1,34 @@
-:root {
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
-  --secondary-color: #10b981;
-  --secondary-hover: #059669;
-  --accent-color: #f59e0b;
-  --danger-color: #ef4444;
-  --bg-color: #f8fafc;
-  --card-bg: #ffffff;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+﻿:root {
+  --bg-workspace: #F8FAFC;
+  --radius-premium: 24px;
+  --shadow-premium: 0 10px 30px rgba(0, 0, 0, 0.02);
+  /* Green & Blue Gradient Palette - Inspired by your Logo */
+
+  --primary-emerald: #10B981;
+  --primary-blue: #06B6D4;
+  --primary-gradient: linear-gradient(135deg, #10B981 0%, #06B6D4 100%);
+  --primary-glow: rgba(16, 185, 129, 0.15);
+
+  --slate-dark: #1F2937;
+  /* The dark color from your logo */
+  --slate-muted: #4B5563;
+
+  /* background: Ultra-light green (almost invisible) */
+  --bg-pure: #F9FFF9;
+  --bg-soft: #F2FFF2;
+  --bg-white: #FFFFFF;
+  --bg-glass: rgba(255, 255, 255, 0.8);
+
+  /* TailAdmin Structure */
+  --radius-xl: 16px;
+  --radius-lg: 12px;
+  --radius-md: 8px;
+
+  --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 20px 40px -10px rgba(16, 185, 129, 0.1);
+
+  --font-main: 'Inter', sans-serif;
+  --font-display: 'Poppins', sans-serif;
 }
 
 * {
@@ -23,25 +38,53 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-main);
+  font-family: var(--font-main);
+  background-color: var(--bg-pure);
+  color: var(--slate-dark);
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
 }
 
 .container {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 0 2rem;
 }
 
-button {
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-}
-
-a {
+/* Base Buttons */
+.btn-premium {
+  background: var(--primary-gradient);
+  color: white;
+  padding: 0.875rem 2rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
   text-decoration: none;
-  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  filter: brightness(1.05);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--primary-emerald);
+  color: var(--primary-emerald);
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover {
+  background: var(--primary-emerald);
+  color: white;
 }

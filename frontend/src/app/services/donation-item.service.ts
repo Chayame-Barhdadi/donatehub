@@ -7,18 +7,30 @@ import { DonationItem } from '../models/donation-item.model';
   providedIn: 'root'
 })
 export class DonationItemService {
-  private apiUrl = 'http://localhost:8085/api/items';
+  private apiUrl = '/api/items';
 
   constructor(private http: HttpClient) { }
 
-  getAllItems(): Observable<DonationItem[]> {
-    return this.http.get<DonationItem[]>(this.apiUrl);
+  getAllItems(city?: string, category?: string): Observable<DonationItem[]> {
+    let params = '';
+    if (city || category) {
+      params = '?';
+      if (city) params += `city=${city}`;
+      if (category) params += (city ? '&' : '') + `category=${category}`;
+    }
+    return this.http.get<DonationItem[]>(this.apiUrl + params);
+  }
+
+  getItemById(id: number): Observable<DonationItem> {
+    return this.http.get<DonationItem>(`${this.apiUrl}/${id}`);
   }
 
   createItem(item: DonationItem): Observable<DonationItem> {
-    // For now, we hardcode a default user (ID 1) as we don't have auth yet
-    const itemWithUser = { ...item, user: { id: 1 } };
-    return this.http.post<DonationItem>(this.apiUrl, itemWithUser);
+    return this.http.post<DonationItem>(this.apiUrl, item);
+  }
+
+  updateItem(id: number, item: DonationItem): Observable<DonationItem> {
+    return this.http.put<DonationItem>(`${this.apiUrl}/${id}`, item);
   }
 
   updateItemStatus(id: number, status: string): Observable<DonationItem> {
@@ -27,5 +39,25 @@ export class DonationItemService {
 
   deleteItem(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getComments(itemId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${itemId}/comments`);
+  }
+
+  addComment(itemId: number, text: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${itemId}/comments`, { text });
+  }
+
+  deleteComment(itemId: number, commentId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${itemId}/comments/${commentId}`);
+  }
+
+  toggleInterest(itemId: number): Observable<any> {
+    return this.http.post<any>(`/api/interests/item/${itemId}`, {});
+  }
+
+  getMyInterests(): Observable<DonationItem[]> {
+    return this.http.get<DonationItem[]>(`/api/interests/me`);
   }
 }

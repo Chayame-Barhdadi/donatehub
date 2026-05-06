@@ -13,9 +13,11 @@ import java.util.List;
 public class DonationItemService {
 
     private final DonationItemRepository itemRepository;
+    private final FileStorageService fileStorageService;
 
-    public DonationItemService(DonationItemRepository itemRepository) {
+    public DonationItemService(DonationItemRepository itemRepository, FileStorageService fileStorageService) {
         this.itemRepository = itemRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     @Transactional
@@ -23,10 +25,28 @@ public class DonationItemService {
         if (item.getStatus() == null) {
             item.setStatus(ItemStatus.AVAILABLE);
         }
+        
+        // Traiter l'image Base64 vers un fichier physique
+        if (item.getImageUrl() != null && item.getImageUrl().startsWith("data:image")) {
+            String fileUrl = fileStorageService.saveBase64Image(item.getImageUrl());
+            item.setImageUrl(fileUrl);
+        }
+        
         return itemRepository.save(item);
     }
 
     public List<DonationItem> getAllItems() {
+        return itemRepository.findAll();
+    }
+
+    public List<DonationItem> searchItems(String city, String category) {
+        if (city != null && !city.isEmpty() && category != null && !category.isEmpty()) {
+            return itemRepository.findByCityAndCategory(city, category);
+        } else if (city != null && !city.isEmpty()) {
+            return itemRepository.findByCity(city);
+        } else if (category != null && !category.isEmpty()) {
+            return itemRepository.findByCategory(category);
+        }
         return itemRepository.findAll();
     }
 

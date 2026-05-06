@@ -5,4 +5,9 @@ export interface DonationItem {
   category: string;
   city: string;
   status: string;
+  imageUrl?: string;
+  user?: {
+    id: number;
+    name: string;
+  };
 }

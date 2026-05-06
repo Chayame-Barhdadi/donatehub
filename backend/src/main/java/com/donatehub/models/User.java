@@ -28,7 +28,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private java.util.Set<Role> roles = new java.util.HashSet<>();
 
-    @JsonManagedReference
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<DonationItem> items;
 

@@ -11,4 +11,7 @@ import java.util.List;
 public interface DonationItemRepository extends JpaRepository<DonationItem, Long> {
     List<DonationItem> findByStatus(ItemStatus status);
     List<DonationItem> findByCity(String city);
+    List<DonationItem> findByCategory(String category);
+    List<DonationItem> findByTitleContainingIgnoreCase(String title);
+    List<DonationItem> findByCityAndCategory(String city, String category);
 }

@@ -7,7 +7,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = authService.getToken();
 
   // On ajoute le token uniquement pour les requêtes vers notre API
-  if (token && req.url.includes('localhost:8085')) {
+  if (token && (req.url.startsWith('/api') || req.url.startsWith('/auth'))) {
     const authReq = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`

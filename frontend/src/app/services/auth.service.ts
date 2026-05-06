@@ -6,7 +6,7 @@ import { Observable, tap } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8085/auth';
+  private apiUrl = '/auth';
   
   // State using signals
   currentUser = signal<any>(null);
@@ -22,9 +22,7 @@ export class AuthService {
   }
 
   register(user: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, user).pipe(
-      tap((res: any) => this.setSession(res))
-    );
+    return this.http.post(`${this.apiUrl}/register`, user);
   }
 
   login(credentials: any): Observable<any> {
