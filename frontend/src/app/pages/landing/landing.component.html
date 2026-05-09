@@ -47,6 +47,7 @@
               <polyline points="12 5 19 12 12 19" />
             </svg>
           </a>
+          <a routerLink="/login" class="btn-outline">Se connecter</a>
         </div>
       </div>
       <div class="hero-visual animate-slide-up">
@@ -68,7 +69,9 @@
       <div class="why-grid">
         <div class="why-card">
           <div class="why-icon-box blue">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
           </div>
           <h3>Impact local</h3>
           <p>Aidez des personnes près de chez vous et soutenez votre communauté au Maroc.</p>
@@ -76,7 +79,9 @@
 
         <div class="why-card">
           <div class="why-icon-box orange">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
           </div>
           <h3>Simple et rapide</h3>
           <p>Publiez un don en quelques clics, sans complications.</p>
@@ -84,7 +89,11 @@
 
         <div class="why-card">
           <div class="why-icon-box emerald">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3 2 4h-2a3 3 0 0 0-3 3c0 2 2 2 2 4a6 6 0 0 1-6 6h-1z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3 2 4h-2a3 3 0 0 0-3 3c0 2 2 2 2 4a6 6 0 0 1-6 6h-1z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
           </div>
           <h3>Écologique</h3>
           <p>Réduisez le gaspillage en donnant une seconde vie à vos objets.</p>
@@ -92,7 +101,12 @@
 
         <div class="why-card">
           <div class="why-icon-box indigo">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
           </div>
           <h3>Solidaire</h3>
           <p>Participez à une plateforme basée sur l’entraide et le partage.</p>
@@ -104,6 +118,10 @@
   <!-- How it works - Minimalist & Pro -->
   <section id="how" class="how-section">
     <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Comment ça marche ?</h2>
+        <div class="title-underline"></div>
+      </div>
       <div class="how-grid">
         <div class="how-card">
           <div class="how-icon-wrapper">
@@ -146,6 +164,58 @@
     </div>
   </section>
 
+  <!-- AI Assistant Showcase -->
+  <section class="ai-showcase">
+    <div class="container ai-grid">
+      <div class="ai-content">
+        <div class="ai-badge">AI Powered</div>
+        <h2 class="section-title text-left">Assistant intelligent intégré</h2>
+        <p class="ai-description">Besoin d’aide pour trouver un objet ? Notre assistant intelligent vous accompagne en temps réel pour dénicher les meilleures opportunités près de chez vous.</p>
+        <ul class="ai-features">
+          <li>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Recherche contextuelle par ville
+          </li>
+          <li>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Suggestions intelligentes de catégories
+          </li>
+          <li>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Aide à la publication ultra-rapide
+          </li>
+        </ul>
+        <a routerLink="/login" class="btn-premium">Essayer l'assistant</a>
+      </div>
+      <div class="ai-visual">
+        <div class="ai-preview-card">
+          <div class="preview-header">
+            <div class="preview-dot red"></div>
+            <div class="preview-dot yellow"></div>
+            <div class="preview-dot green"></div>
+          </div>
+          <div class="preview-chat">
+            <div class="chat-msg user">"Je cherche un vélo à Casablanca"</div>
+            <div class="chat-msg ai">
+              <div class="ai-pulse"></div>
+              J'ai trouvé 3 vélos disponibles à Casablanca pour vous !
+            </div>
+            <div class="preview-items">
+              <div class="preview-item-mini"></div>
+              <div class="preview-item-mini"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer class="footer">
     <div class="container footer-content">
@@ -168,8 +238,8 @@
           <span class="modal-badge">{{ selectedDon()?.location }}</span>
           <h2 class="modal-title">{{ selectedDon()?.title }}</h2>
           <div class="modal-info">
-            <p><strong>Donateur :</strong> {{ selectedDon()?.donor }}</p>
-            <p><strong>État :</strong> {{ selectedDon()?.condition }}</p>
+            <p><strong>Donateur&nbsp;:</strong> {{ selectedDon()?.donor }}</p>
+            <p><strong>État&nbsp;:</strong> {{ selectedDon()?.condition }}</p>
           </div>
           <p class="modal-desc">{{ selectedDon()?.description }}</p>
           <button class="btn-premium w-full mt-6" style="margin-top: 2rem;">Commenter pour réserver</button>

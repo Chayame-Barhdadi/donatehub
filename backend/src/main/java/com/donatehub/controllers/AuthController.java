@@ -39,7 +39,7 @@ public class AuthController {
         
         User savedUser = userRepository.save(user);
         
-        String token = jwtService.generateToken(savedUser.getEmail());
+        String token = jwtService.generateToken(savedUser.getEmail(), savedUser.getRoles());
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("user", savedUser);
@@ -55,7 +55,7 @@ public class AuthController {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword())) {
             User user = userOpt.get();
-            String token = jwtService.generateToken(user.getEmail());
+            String token = jwtService.generateToken(user.getEmail(), user.getRoles());
             
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);

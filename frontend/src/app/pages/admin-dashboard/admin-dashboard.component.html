@@ -1,0 +1,263 @@
+<div class="admin-container">
+  <header class="admin-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>Administration</h1>
+      </div>
+      <button routerLink="/dashboard" class="btn-back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Retour au Dashboard
+      </button>
+    </div>
+  </header>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Utilisateurs</span>
+        <span class="stat-value">{{ stats().totalUsers }}</span>
+      </div>
+      <div class="stat-trend positive">En croissance</div>
+    </div>
+
+    <div class="stat-card success">
+      <div class="stat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Total des Dons</span>
+        <span class="stat-value">{{ stats().totalItems }}</span>
+      </div>
+      <div class="stat-trend">{{ stats().availableItems }} actifs</div>
+    </div>
+
+    <div class="stat-card warning">
+      <div class="stat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Dons Reçus</span>
+        <span class="stat-value">{{ stats().givenItems }}</span>
+      </div>
+      <div class="stat-trend">{{ stats().reservedItems }} en attente</div>
+    </div>
+
+    <div class="stat-card info">
+      <div class="stat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Top Catégorie</span>
+        <span class="stat-value truncate">{{ stats().topCategory }}</span>
+      </div>
+      <div class="stat-trend">Catégorie phare</div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="charts-row">
+    <!-- Status Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="6" height="18"/><rect x="9" y="8" width="6" height="13"/><rect x="16" y="13" width="6" height="8"/></svg>
+          Statut des Publications
+        </h3>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-group" *ngFor="let d of statusChart()">
+          <div class="bar-label">{{ d.label }}</div>
+          <div class="bar-track">
+            <div class="bar-fill" [style.width.%]="barWidth(d.count, statusChartMax())" [style.background]="d.color"></div>
+          </div>
+          <div class="bar-count">{{ d.count }}</div>
+        </div>
+      </div>
+      <!-- Donut mini -->
+      <div class="donut-row">
+        <div class="donut-legend" *ngFor="let d of statusChart()">
+          <span class="legend-dot" [style.background]="d.color"></span>
+          <span>{{ d.label }} <strong>{{ d.count }}</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          Top Catégories
+        </h3>
+      </div>
+      <div class="bar-chart" *ngIf="stats().categoryData.length > 0; else noCats">
+        <div class="bar-group" *ngFor="let d of stats().categoryData; let i = index">
+          <div class="bar-label">{{ d.label }}</div>
+          <div class="bar-track">
+            <div class="bar-fill cat-bar" [style.width.%]="barWidth(d.count, chartMax())"
+              [class.cat-0]="i===0" [class.cat-1]="i===1" [class.cat-2]="i===2"
+              [class.cat-3]="i===3" [class.cat-4]="i===4"></div>
+          </div>
+          <div class="bar-count">{{ d.count }}</div>
+        </div>
+      </div>
+      <ng-template #noCats>
+        <div class="chart-empty">Aucune donnée disponible</div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Tables Grid -->
+  <div class="admin-grid">
+    <!-- Users Section -->
+    <section class="admin-section">
+      <div class="section-header">
+        <div class="section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <h2>Utilisateurs</h2>
+          <span class="count-badge">{{ filteredUsers().length }}</span>
+        </div>
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Rechercher un utilisateur..." [value]="userSearch()"
+            (input)="setUserSearch($any($event.target).value)">
+        </div>
+      </div>
+
+      <div class="table-container custom-scrollbar">
+        <table>
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Ville</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of paginatedUsers()">
+              <td>
+                <div class="user-cell">
+                  <div class="avatar-mini">{{ user.name.charAt(0) }}</div>
+                  <div class="user-meta">
+                    <span class="user-name">{{ user.name }}</span>
+                    <span class="user-email">{{ user.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>{{ user.city || '—' }}</td>
+              <td class="text-right">
+                <button (click)="deleteUser(user.id)" class="btn-icon-delete" title="Supprimer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="paginatedUsers().length === 0">
+              <td colspan="3" class="empty-row">Aucun utilisateur trouvé</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Users -->
+      <div class="pagination-bar">
+        <span class="page-info">Page {{ userPage() }} / {{ userTotalPages() }}</span>
+        <div class="page-actions">
+          <button class="page-btn" (click)="prevUserPage()" [disabled]="userPage() === 1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="page-btn" (click)="nextUserPage()" [disabled]="userPage() === userTotalPages()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Items Section -->
+    <section class="admin-section">
+      <div class="section-header">
+        <div class="section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8V21H3V8M1 3H23V8H1V3M10 12H14"/></svg>
+          <h2>Modération des Dons</h2>
+          <span class="count-badge">{{ filteredItems().length }}</span>
+        </div>
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Rechercher un don..." [value]="itemSearch()"
+            (input)="setItemSearch($any($event.target).value)">
+        </div>
+      </div>
+
+      <div class="table-container custom-scrollbar">
+        <table>
+          <thead>
+            <tr>
+              <th>Objet</th>
+              <th>Catégorie</th>
+              <th>Statut</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of paginatedItems()">
+              <td>
+                <div class="item-cell">
+                  <span class="item-title">{{ item.title }}</span>
+                  <span class="item-donor">Par {{ item.user?.name }}</span>
+                </div>
+              </td>
+              <td><span class="category-tag">{{ item.category || '—' }}</span></td>
+              <td><span class="badge" [ngClass]="item.status.toLowerCase()">{{ item.status }}</span></td>
+              <td class="text-right">
+                <button (click)="deleteItem(item.id)" class="btn-icon-delete" title="Supprimer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="paginatedItems().length === 0">
+              <td colspan="4" class="empty-row">Aucun don trouvé</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Items -->
+      <div class="pagination-bar">
+        <span class="page-info">Page {{ itemPage() }} / {{ itemTotalPages() }}</span>
+        <div class="page-actions">
+          <button class="page-btn" (click)="prevItemPage()" [disabled]="itemPage() === 1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="page-btn" (click)="nextItemPage()" [disabled]="itemPage() === itemTotalPages()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showConfirmModal()" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header-icon danger">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+    <div class="modal-body text-center">
+      <h3>{{ modalConfig()?.title }}</h3>
+      <p>{{ modalConfig()?.message }}</p>
+    </div>
+    <div class="modal-footer">
+      <button (click)="closeModal()" class="btn-cancel">Annuler</button>
+      <button (click)="confirmAction()" class="btn-confirm-danger">Confirmer la suppression</button>
+    </div>
+  </div>
+</div>

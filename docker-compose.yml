@@ -35,6 +35,21 @@ services:
       db:
         condition: service_healthy
 
+  # ─── Python AI Assistant Microservice ──────────────
+  ai-assistant:
+    build:
+      context: ./ai-assistant
+      dockerfile: Dockerfile
+    container_name: donatehub-ai-assistant
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=DonateHub AI Assistant
+      - DEBUG=False
+    volumes:
+      - huggingface_cache:/root/.cache/huggingface
+
   # ─── Angular Frontend (Nginx) ─────────────────────
   frontend:
     build:
@@ -46,7 +61,9 @@ services:
       - "4200:80"
     depends_on:
       - backend
+      - ai-assistant
 
 volumes:
   postgres_data:
   uploads_data:
+  huggingface_cache:

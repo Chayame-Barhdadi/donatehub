@@ -52,25 +52,33 @@ public class CommentController {
         Comment savedComment = commentRepository.save(comment);
 
         // 1. Notification pour le propriétaire de l'objet
-        if (!item.getUser().getId().equals(user.getId())) {
-            String msg = user.getName() + " a commenté votre objet : " + item.getTitle();
-            notificationService.createNotification(item.getUser(), user, msg, "COMMENT", itemId);
+        User owner = item.getUser();
+        boolean isOwnerMentioned = false;
+        
+        // 2. Détecter les mentions pour personnaliser le message
+        String text = comment.getText();
+        if (text != null && text.contains("@" + owner.getName())) {
+            isOwnerMentioned = true;
         }
 
-        // 2. Notification pour les personnes mentionnées (@Nom)
-        String text = comment.getText();
+        if (!owner.getId().equals(user.getId())) {
+            String msg = isOwnerMentioned 
+                ? user.getName() + " vous a mentionné sur l'objet : " + item.getTitle()
+                : user.getName() + " a commenté votre objet : " + item.getTitle();
+            notificationService.createNotification(owner, user, msg, "COMMENT", itemId);
+        }
+
+        // 3. Notification pour les autres personnes mentionnées (@Nom)
         if (text != null && text.contains("@")) {
-            // On cherche tous les utilisateurs impliqués dans ce post (auteur et commentateurs)
-            // pour éviter de scanner toute la base de données
             List<Comment> itemComments = commentRepository.findByItemIdOrderByCreatedAtAsc(itemId);
             itemComments.stream()
                 .map(Comment::getAuthor)
                 .distinct()
                 .filter(u -> !u.getId().equals(user.getId())) // Ne pas s'auto-notifier
-                .filter(u -> !u.getId().equals(item.getUser().getId())) // Déjà notifié si c'est le proprio
+                .filter(u -> !u.getId().equals(owner.getId())) // Déjà notifié si c'est le proprio
                 .forEach(u -> {
                     if (text.contains("@" + u.getName())) {
-                        String msg = user.getName() + " vous a répondu sur l'objet : " + item.getTitle();
+                        String msg = user.getName() + " vous a mentionné sur l'objet : " + item.getTitle();
                         notificationService.createNotification(u, user, msg, "COMMENT", itemId);
                     }
                 });

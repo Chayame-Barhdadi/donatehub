@@ -24,8 +24,9 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String email, java.util.Set<com.donatehub.models.Role> roles) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", roles.stream().map(Enum::name).collect(java.util.stream.Collectors.toList()));
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(email)
@@ -33,6 +34,15 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public java.util.List<String> extractRoles(String token) {
+        return (java.util.List<String>) Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("roles");
     }
 
     public String extractEmail(String token) {

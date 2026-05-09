@@ -9,5 +9,7 @@ export interface DonationItem {
   user?: {
     id: number;
     name: string;
+    avatarColor?: string;
+    roles?: string[];
   };
 }

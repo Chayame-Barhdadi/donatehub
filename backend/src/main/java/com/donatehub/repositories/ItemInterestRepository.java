@@ -8,5 +8,7 @@ import java.util.Optional;
 public interface ItemInterestRepository extends JpaRepository<ItemInterest, Long> {
     List<ItemInterest> findByUserId(Long userId);
     Optional<ItemInterest> findByUserIdAndItemId(Long userId, Long itemId);
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
     void deleteByUserIdAndItemId(Long userId, Long itemId);
 }

@@ -1,0 +1,145 @@
+<!-- ═══════════════════════════════════════
+     MODE FULL — Authenticated users
+════════════════════════════════════════ -->
+<ng-container *ngIf="viewMode === 'FULL'">
+
+  <!-- FAB Button -->
+  <button
+    id="ai-fab-btn"
+    class="ai-fab"
+    (mousedown)="onDragStart($event)"
+    (touchstart)="onDragStart($event)"
+    (click)="toggleChat()"
+    [class.hidden]="isOpen()"
+    [style.transform]="'translate(' + dragPosition().x + 'px, ' + dragPosition().y + 'px)'"
+    title="Assistant DonateHub"
+    aria-label="Ouvrir l'assistant">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <span class="fab-pulse"></span>
+  </button>
+
+  <!-- Chat Window -->
+  <div id="ai-chat-window" class="ai-chat-window" [class.open]="isOpen()" role="dialog" aria-label="Assistant DonateHub">
+
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="header-left">
+        <div class="ai-avatar-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="header-title">Assistant DonateHub</p>
+          <p class="header-status">
+            <span class="status-dot"></span>Actif
+          </p>
+        </div>
+      </div>
+      <button class="close-btn" (click)="toggleChat()" aria-label="Fermer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-body" #chatContainer>
+
+      <div *ngFor="let msg of messages()"
+           class="msg-row"
+           [class.msg-row--user]="msg.sender === 'user'">
+
+        <!-- AI Icon -->
+        <div *ngIf="msg.sender === 'ai'" class="msg-icon">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+
+        <div class="msg-col">
+          <!-- Bubble -->
+          <div class="msg-bubble"
+               [class.msg-bubble--user]="msg.sender === 'user'"
+               [class.msg-bubble--ai]="msg.sender === 'ai'">
+            <span *ngIf="msg.isMarkdown" [innerHTML]="renderMarkdown(msg.text)"></span>
+            <span *ngIf="!msg.isMarkdown">{{ msg.text }}</span>
+          </div>
+
+          <!-- Items cards -->
+          <div *ngIf="msg.items && msg.items.length > 0" class="items-strip">
+            <div *ngFor="let item of msg.items" class="item-card">
+              <div class="item-img">
+                <img [src]="item.imageUrl || 'assets/default-item.png'" [alt]="item.title" loading="lazy">
+                <span class="item-badge">{{ item.city }}</span>
+              </div>
+              <div class="item-info">
+                <span class="item-cat">{{ item.category }}</span>
+                <p class="item-title">{{ item.title }}</p>
+              </div>
+            </div>
+          </div>
+
+          <span class="msg-time">{{ msg.time | date:'HH:mm' }}</span>
+        </div>
+      </div>
+
+      <!-- Typing indicator -->
+      <div *ngIf="isTyping()" class="msg-row">
+        <div class="msg-icon">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="typing-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick chips -->
+    <div class="chips-row" *ngIf="showChips">
+      <button *ngFor="let chip of quickChips"
+              class="chip"
+              (click)="sendChip(chip.value)">
+        {{ chip.label }}
+      </button>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-footer">
+      <input
+        #inputRef
+        id="ai-chat-input"
+        type="text"
+        class="chat-input"
+        [ngModel]="message()"
+        (ngModelChange)="message.set($event)"
+        (keyup.enter)="sendMessage()"
+        placeholder="Posez votre question…"
+        [disabled]="isTyping()"
+        autocomplete="off"
+        aria-label="Message pour l'assistant" />
+      <button
+        id="ai-send-btn"
+        class="send-btn"
+        (click)="sendMessage()"
+        [disabled]="!message().trim() || isTyping()"
+        aria-label="Envoyer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+</ng-container>
+
+<!-- ═══════════════════════════════════════
+     MODE HIDDEN — public routes
+════════════════════════════════════════ -->
+<!-- Rien affiché sur login/landing/register -->

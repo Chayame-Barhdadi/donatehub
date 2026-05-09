@@ -15,8 +15,8 @@
         </svg>
       </button>
     </div>
-    <div class="sidebar-menu" style="display: flex; flex-direction: column; padding-top: 2.5rem;">
-      <div style="margin-bottom: 2rem;">
+    <div class="sidebar-menu" style="display: flex; flex-direction: column; padding-top: 1.5rem;">
+      <div style="margin-bottom: 1.5rem;">
         <h3 class="menu-title" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(6, 95, 70, 0.6); padding: 0 1.5rem; margin-bottom: 1rem; font-weight: 700;">MENU</h3>
         <ul class="menu-list">
           <li>
@@ -53,13 +53,29 @@
               Mes intérêts
             </a>
           </li>
+          <li *ngIf="isAdmin()">
+            <a class="menu-link" [class.active]="activeView() === 'admin'" (click)="setView('admin')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Administration
+            </a>
+          </li>
+          <li>
+            <a class="menu-link" style="color: #10b981; font-weight: 600;" (click)="openAssistant()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              Assistant IA
+            </a>
+          </li>
         </ul>
       </div>
 
-      <hr style="border: 0; height: 1px; background: rgba(6, 95, 70, 0.15); margin: 0 1.5rem 2rem;">
+      <hr style="border: 0; height: 1px; background: rgba(6, 95, 70, 0.15); margin: 0.5rem 1.5rem 0.75rem;">
 
       <div>
-        <h3 class="menu-title" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(6, 95, 70, 0.6); padding: 0 1.5rem; margin-bottom: 1rem; font-weight: 700;">COMPTE</h3>
+        <h3 class="menu-title" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(6, 95, 70, 0.6); padding: 0 1.5rem; margin-bottom: 0.75rem; font-weight: 700;">COMPTE</h3>
         <ul class="menu-list">
           <li>
             <a class="menu-link" [class.active]="activeView() === 'parametres'" (click)="setView('parametres')">
@@ -113,50 +129,54 @@
           </button>
 
           <div *ngIf="showNotificationDropdown()" class="notif-dropdown animate-fade-in premium-dropdown">
+
             <div class="notif-header">
-              <div class="notif-header-title">
-                <h3>Notifications</h3>
-                <span *ngIf="unreadNotificationsCount() > 0" class="notif-count-pill">{{ unreadNotificationsCount() }} nouvelles</span>
-              </div>
-              <button (click)="markAllNotificationsAsRead()" class="mark-all-btn">Tout marquer comme lu</button>
+              <h3>Notifications</h3>
+              <button class="mark-all-btn" (click)="markAllNotificationsAsRead()">
+                Tout marquer comme lu
+              </button>
             </div>
 
-            <div class="notif-list custom-scrollbar">
+            <div class="notif-list no-scrollbar">
               <div *ngIf="notifications().length === 0" class="notif-empty">
-                <div class="empty-icon">🔔</div>
-                <p>Aucune notification pour le moment.</p>
-                <span>Nous vous préviendrons quand il y aura du nouveau !</span>
+                <div class="empty-icon-wrapper">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                </div>
+                <h4>Vous êtes à jour !</h4>
+                <p>Toutes vos nouvelles notifications et interactions apparaîtront ici.</p>
               </div>
 
-              <!-- Group: Nouveau -->
+              <!-- Section: Nouveau -->
               <ng-container *ngIf="unreadNotifications.length > 0">
                 <div class="notif-group-label">Nouveau</div>
                 <div *ngFor="let notif of unreadNotifications" class="notif-item unread" (click)="markNotificationAsRead(notif)">
-                  <div class="notif-actor-avatar" [ngClass]="'avatar-bg-' + ((notif.actor?.id || 0) % 6 + 1)">
-                    <ng-container *ngIf="notif.actor; else defaultIcon">
+                  <div class="notif-actor-avatar" [class.is-admin-avatar]="notif.actor?.roles?.includes('ADMIN')" [style.background-color]="notif.actor?.avatarColor || '#3b82f6'">
+                    <ng-container *ngIf="notif.actor; else actorIcon">
                       {{ notif.actor.name.charAt(0).toUpperCase() }}
                     </ng-container>
-                    <ng-template #defaultIcon>🔔</ng-template>
+                    <ng-template #actorIcon>🔔</ng-template>
                   </div>
                   <div class="notif-body">
                     <p class="notif-text">
                       <ng-container *ngIf="notif.actor; else rawMessage">
-                        <span class="actor-name">{{ notif.actor.name }}</span> 
-                        {{ getNotificationActionText(notif) }}
+                        <strong>{{ notif.actor.name }}</strong> {{ getNotificationActionText(notif) }}
                       </ng-container>
                       <ng-template #rawMessage>{{ notif.message }}</ng-template>
                     </p>
                     <span class="notif-time">{{ getRelativeTime(notif.createdAt) }}</span>
                   </div>
                   <div class="notif-status-dot"></div>
+                  <div class="notif-action-overlay">
+                    <button class="btn-notif-view">Voir</button>
+                  </div>
                 </div>
               </ng-container>
 
-              <!-- Group: Plus tôt -->
+              <!-- Section: Plus tôt -->
               <ng-container *ngIf="readNotifications.length > 0">
                 <div class="notif-group-label">Plus tôt</div>
                 <div *ngFor="let notif of readNotifications" class="notif-item" (click)="markNotificationAsRead(notif)">
-                  <div class="notif-actor-avatar grayscale" [ngClass]="'avatar-bg-' + ((notif.actor?.id || 0) % 6 + 1)">
+                  <div class="notif-actor-avatar" [class.is-admin-avatar]="notif.actor?.roles?.includes('ADMIN')" [style.background-color]="notif.actor?.avatarColor || '#3b82f6'">
                     <ng-container *ngIf="notif.actor; else defaultIconOld">
                       {{ notif.actor.name.charAt(0).toUpperCase() }}
                     </ng-container>
@@ -165,29 +185,34 @@
                   <div class="notif-body">
                     <p class="notif-text">
                       <ng-container *ngIf="notif.actor; else rawMessageOld">
-                        <span class="actor-name">{{ notif.actor.name }}</span> 
-                        {{ getNotificationActionText(notif) }}
+                        <strong>{{ notif.actor.name }}</strong> {{ getNotificationActionText(notif) }}
                       </ng-container>
                       <ng-template #rawMessageOld>{{ notif.message }}</ng-template>
                     </p>
                     <span class="notif-time">{{ getRelativeTime(notif.createdAt) }}</span>
                   </div>
+                  <div class="notif-action-overlay">
+                    <button class="btn-notif-view">Voir</button>
+                  </div>
                 </div>
               </ng-container>
-            </div>
-            
-            <div class="notif-footer">
-              <button class="view-all-notif" (click)="setView('notifications'); showNotificationDropdown.set(false)">Voir toutes les notifications</button>
             </div>
           </div>
         </div>
 
         <div class="user-area" (click)="setView('parametres')">
           <div class="user-info hidden-mobile">
-            <span class="user-name">{{ profileName() || 'Utilisateur' }}</span>
-            <span class="user-role">Donateur</span>
+            <div class="user-name-wrapper">
+              <span class="user-name">{{ profileName() || 'Utilisateur' }}</span>
+              <span *ngIf="isAdmin()" class="verified-badge" title="Compte Vérifié">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/>
+                </svg>
+              </span>
+            </div>
+            <span class="user-role">{{ isAdmin() ? 'Administrateur' : 'Donateur' }}</span>
           </div>
-          <div class="user-avatar">
+          <div class="user-avatar" [class.is-admin-avatar]="isAdmin()" [style.background-color]="profileAvatarColor()">
             {{ profileName() ? profileName().charAt(0).toUpperCase() : '?' }}
           </div>
         </div>
@@ -199,46 +224,203 @@
 
         <ng-container [ngSwitch]="activeView()">
 
-          <!-- View: Notifications -->
-          <div *ngSwitchCase="'notifications'" class="animate-fade-in">
-            <div class="notifications-page">
-              <div class="view-header">
+          <!-- View: Admin Dashboard -->
+          <div *ngSwitchCase="'admin'" class="animate-fade-in">
+            <div class="admin-dashboard-view">
+              <div class="view-header mb-8">
                 <div>
-                  <h2 class="view-title">Toutes vos notifications</h2>
+                  <h2 class="view-title text-2xl font-bold">Administration</h2>
                 </div>
               </div>
 
-              <div class="notifications-card">
-                <div *ngIf="notifications().length === 0" class="notif-empty">
-                  <div class="empty-icon">🔔</div>
-                  <p>Aucune notification</p>
-                  <span>Vous n'avez pas encore reçu de notifications.</span>
+              <!-- Premium Admin Stats -->
+              <div class="admin-stats-container mb-8">
+                <div class="admin-stat-card glass-blue">
+                  <div class="admin-stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  </div>
+                  <div class="admin-stat-data">
+                    <span class="admin-stat-label">Utilisateurs</span>
+                    <span class="admin-stat-value">{{ adminStats().totalUsers }}</span>
+                  </div>
+                  <div class="admin-stat-chart">
+                    <div *ngFor="let bar of [40,60,50,80,100]" class="bar-mini" [style.height.%]="bar"></div>
+                  </div>
                 </div>
 
-                <div *ngFor="let notif of notifications()" class="full-notif-item" [class.unread]="!notif.read" (click)="markNotificationAsRead(notif)">
-                  <div class="notif-actor-avatar large" [ngClass]="'avatar-bg-' + ((notif.actor?.id || 0) % 6 + 1)">
-                    <ng-container *ngIf="notif.actor; else actorIconLarge">
-                      {{ notif.actor.name.charAt(0).toUpperCase() }}
-                    </ng-container>
-                    <ng-template #actorIconLarge>🔔</ng-template>
+                <div class="admin-stat-card glass-green">
+                  <div class="admin-stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                   </div>
-                  <div class="notif-main">
-                    <div class="notif-text-row">
-                      <p class="notif-description">
-                        <ng-container *ngIf="notif.actor; else fullMsg">
-                          <span class="actor-name">{{ notif.actor.name }}</span> 
-                          {{ getNotificationActionText(notif) }}
-                        </ng-container>
-                        <ng-template #fullMsg>{{ notif.message }}</ng-template>
-                      </p>
-                      <span class="notif-timestamp">{{ notif.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
-                    </div>
-                    <div class="notif-actions">
-                      <button class="notif-action-btn primary" (click)="$event.stopPropagation(); markNotificationAsRead(notif)">Voir l'objet</button>
-                      <button *ngIf="!notif.read" class="notif-action-btn secondary" (click)="$event.stopPropagation(); markNotificationAsRead(notif)">Marquer comme lu</button>
+                  <div class="admin-stat-data">
+                    <span class="admin-stat-label">Dons Actifs</span>
+                    <span class="admin-stat-value">{{ adminStats().availableItems }}</span>
+                  </div>
+                  <div class="admin-stat-chart">
+                    <div *ngFor="let bar of [30,50,90,70,85]" class="bar-mini" [style.height.%]="bar"></div>
+                  </div>
+                </div>
+
+                <div class="admin-stat-card glass-purple">
+                  <div class="admin-stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                  </div>
+                  <div class="admin-stat-data">
+                    <span class="admin-stat-label">Dons Finalisés</span>
+                    <span class="admin-stat-value">{{ adminStats().givenItems }}</span>
+                  </div>
+                  <div class="admin-stat-chart">
+                    <div *ngFor="let bar of [20,40,60,80,95]" class="bar-mini" [style.height.%]="bar"></div>
+                  </div>
+                </div>
+
+                <div class="admin-stat-card glass-gold">
+                  <div class="admin-stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </div>
+                  <div class="admin-stat-data">
+                    <span class="admin-stat-label">Top Catégorie</span>
+                    <span class="admin-stat-value text-sm">{{ adminStats().topCategory }}</span>
+                  </div>
+                  <div class="admin-stat-chart">
+                    <div *ngFor="let bar of [100,80,60,40,20]" class="bar-mini" [style.height.%]="bar"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Charts Row -->
+              <div class="stats-grid mb-8">
+                <div class="admin-data-card p-6">
+                  <h3 class="view-title text-sm font-bold uppercase mb-4" style="color: var(--text-light); letter-spacing: 0.05em;">Répartition des Statuts</h3>
+                  <div class="bar-chart-container">
+                    <div *ngFor="let item of statusDistribution()" class="bar-row">
+                      <div class="bar-label">{{ item.label }}</div>
+                      <div class="bar-track">
+                        <div class="bar-fill" [style.width.%]="item.percent" [style.background-color]="item.color"></div>
+                      </div>
+                      <div class="bar-value">{{ item.count }}</div>
                     </div>
                   </div>
-                  <div *ngIf="!notif.read" class="unread-badge"></div>
+                </div>
+
+                <div class="admin-data-card p-6">
+                  <h3 class="view-title text-sm font-bold uppercase mb-4" style="color: var(--text-light); letter-spacing: 0.05em;">Top 5 Catégories</h3>
+                  <div class="bar-chart-container">
+                    <div *ngFor="let item of categoryDistribution()" class="bar-row">
+                      <div class="bar-label">{{ item.label }}</div>
+                      <div class="bar-track">
+                        <div class="bar-fill" [style.width.%]="item.percent" style="background-color: var(--primary)"></div>
+                      </div>
+                      <div class="bar-value">{{ item.count }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="admin-grid-layout">
+                <!-- Users Table -->
+                <div class="admin-data-card">
+                  <div class="card-header">
+                    <div class="header-main">
+                      <h3>Liste des Utilisateurs</h3>
+                      <span class="badge-count">{{ filteredAdminUsers().length }}</span>
+                    </div>
+                    <div class="header-search">
+                      <input type="text" placeholder="Rechercher un utilisateur..." 
+                             [ngModel]="adminUserSearch()" (ngModelChange)="adminUserSearch.set($event); adminUserPage.set(1)"
+                             class="admin-search-input">
+                    </div>
+                  </div>
+                  <div class="card-body custom-scrollbar">
+                    <table class="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Utilisateur</th>
+                          <th>Ville</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let user of paginatedAdminUsers()">
+                          <td>
+                            <div class="admin-user-cell">
+                              <div class="user-avatar-mini" [style.background-color]="user.avatarColor || '#3b82f6'">{{ user.name.charAt(0) }}</div>
+                              <div class="admin-user-info">
+                                <span class="name">{{ user.name }}</span>
+                                <span class="email">{{ user.email }}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td>{{ user.city }}</td>
+                          <td>
+                            <div class="flex-end">
+                              <button (click)="deleteUserAsAdmin(user.id)" class="btn-table-delete">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- User Pagination -->
+                  <div class="card-footer-pagination" *ngIf="adminUserTotalPages() > 1">
+                    <button [disabled]="adminUserPage() === 1" (click)="setAdminUserPage(adminUserPage() - 1)" class="btn-pag">Précédent</button>
+                    <span class="pag-info">Page {{ adminUserPage() }} sur {{ adminUserTotalPages() }}</span>
+                    <button [disabled]="adminUserPage() === adminUserTotalPages()" (click)="setAdminUserPage(adminUserPage() + 1)" class="btn-pag">Suivant</button>
+                  </div>
+                </div>
+
+                <!-- Items Moderation -->
+                <div class="admin-data-card">
+                  <div class="card-header">
+                    <div class="header-main">
+                      <h3>Modération des Dons</h3>
+                      <span class="badge-count">{{ filteredAdminItems().length }}</span>
+                    </div>
+                    <div class="header-search">
+                      <input type="text" placeholder="Rechercher un objet..." 
+                             [ngModel]="adminItemSearch()" (ngModelChange)="adminItemSearch.set($event); adminItemPage.set(1)"
+                             class="admin-search-input">
+                    </div>
+                  </div>
+                  <div class="card-body custom-scrollbar">
+                    <table class="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Objet</th>
+                          <th>Statut</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let item of paginatedAdminItems()">
+                          <td>
+                            <div class="admin-item-cell">
+                              <span class="title">{{ item.title }}</span>
+                              <span class="owner">Par {{ item.user?.name }}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span class="status-pill" [ngClass]="item.status.toLowerCase()">{{ item.status }}</span>
+                          </td>
+                          <td>
+                            <div class="flex-end">
+                              <button (click)="deleteItemAsAdmin(item.id)" class="btn-table-delete">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- Item Pagination -->
+                  <div class="card-footer-pagination" *ngIf="adminItemTotalPages() > 1">
+                    <button [disabled]="adminItemPage() === 1" (click)="setAdminItemPage(adminItemPage() - 1)" class="btn-pag">Précédent</button>
+                    <span class="pag-info">Page {{ adminItemPage() }} sur {{ adminItemTotalPages() }}</span>
+                    <button [disabled]="adminItemPage() === adminItemTotalPages()" (click)="setAdminItemPage(adminItemPage() + 1)" class="btn-pag">Suivant</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -372,7 +554,7 @@
             <div *ngIf="filteredItems().length > 0" class="item-grid-modern">
               <div class="modern-card" *ngFor="let item of filteredItems()" (click)="viewDetails(item)" style="cursor: pointer;">
                 <div class="card-img-top">
-                  <img *ngIf="item.imageUrl" [src]="item.imageUrl" alt="Don">
+                  <img *ngIf="item.imageUrl" [src]="item.imageUrl" alt="Don" (click)="openZoom(item.imageUrl, $event)">
                   <div *ngIf="!item.imageUrl" class="no-image-placeholder">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -406,8 +588,15 @@
                   <h3 class="card-title">{{ item.title }}</h3>
                   <div class="card-footer">
                     <div class="user-pill">
-                      <div class="user-avatar-sm">{{ item.user?.name?.charAt(0) || '?' }}</div>
-                      <span class="user-name-sm">{{ item.user?.name || 'Anonyme' }}</span>
+                      <div class="user-avatar-sm" [class.is-admin-avatar]="item.user?.roles?.includes('ADMIN')" [style.background-color]="item.user?.avatarColor || '#3b82f6'">{{ item.user?.name?.charAt(0) || '?' }}</div>
+                      <div class="user-name-wrapper">
+                        <span class="user-name-sm">{{ item.user?.name || 'Anonyme' }}</span>
+                        <span *ngIf="item.user?.roles?.includes('ADMIN')" class="verified-badge" title="Compte Vérifié">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/>
+                          </svg>
+                        </span>
+                      </div>
                     </div>
                     <button class="btn-icon" title="Voir l'objet">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -587,10 +776,11 @@
                             <polyline [attr.points]="showPublishCategoryDropdown() ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"></polyline>
                           </svg>
                         </button>
-                        <div *ngIf="showPublishCategoryDropdown()" style="position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); z-index: 9999; max-height: 200px; overflow-y: auto;">
+                        <div *ngIf="showPublishCategoryDropdown()" class="no-scrollbar" style="position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); z-index: 9999; max-height: 200px; overflow-y: auto;">
                           <button *ngFor="let cat of categories" type="button"
                             (click)="itemForm.patchValue({category: cat}); showPublishCategoryDropdown.set(false)"
-                            style="display: block; width: 100%; text-align: left; padding: 0.5rem 1rem; border: none; background: transparent; cursor: pointer; font-size: 0.875rem;"
+                            class="category-item"
+                            [attr.data-tooltip]="'Découvrir ' + cat"
                             [style.background-color]="itemForm.value.category === cat ? '#ECFDF5' : 'transparent'"
                             [style.color]="itemForm.value.category === cat ? 'var(--primary)' : 'var(--text-black)'"
                             [style.font-weight]="itemForm.value.category === cat ? '600' : '400'">
@@ -610,10 +800,12 @@
                           placeholder="Saisissez votre ville">
                         
                         <div *ngIf="showPublishCityDropdown() && filteredCities()(publishCityQuery()).length > 0" 
+                          class="no-scrollbar"
                           style="position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); z-index: 9999; max-height: 200px; overflow-y: auto;">
                           <button *ngFor="let city of filteredCities()(publishCityQuery())" type="button"
                             (click)="itemForm.patchValue({city: city}); showPublishCityDropdown.set(false)"
-                            style="display: block; width: 100%; text-align: left; padding: 0.6rem 1rem; border: none; background: transparent; cursor: pointer; font-size: 0.875rem;"
+                            class="city-item"
+                            [attr.data-tooltip]="'Dons à ' + city"
                             [style.background-color]="itemForm.value.city === city ? '#ECFDF5' : 'transparent'">
                             {{ city }}
                           </button>
@@ -687,11 +879,13 @@
               </div>
               <div class="profile-info-container">
                 <div class="profile-avatar-wrapper">
-                  <div class="profile-avatar-big">{{ profileName().charAt(0) || '?' }}</div>
+                  <div class="profile-avatar-big" [class.is-admin-avatar]="isAdmin()" [style.background-color]="draftAvatarColor()">
+                    {{ draftName().charAt(0) || '?' }}
+                  </div>
                 </div>
                 <div class="mt-4 text-center">
                   <h3 class="text-xl font-bold text-black">{{ profileName() }}</h3>
-                  <p class="text-sm text-body font-medium">{{ profileEmail() }}</p>
+                  <p class="text-sm text-body font-medium mt-4">{{ profileEmail() }}</p>
                 </div>
               </div>
             </div>
@@ -736,10 +930,12 @@
                         placeholder="Votre ville">
                       
                       <div *ngIf="showCityDropdown() && filteredCities()(profileCityQuery()).length > 0" 
+                        class="no-scrollbar"
                         style="position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); z-index: 9999; max-height: 200px; overflow-y: auto;">
                         <button *ngFor="let city of filteredCities()(profileCityQuery())" type="button"
                           (click)="draftCity.set(city); showCityDropdown.set(false)"
-                          style="display: block; width: 100%; text-align: left; padding: 0.6rem 1rem; border: none; background: transparent; cursor: pointer; font-size: 0.9rem;">
+                          class="city-item"
+                          [attr.data-tooltip]="'Je réside à ' + city">
                           {{ city }}
                         </button>
                       </div>
@@ -804,7 +1000,7 @@
             <div *ngIf="myInterests().length > 0" class="item-grid-modern">
               <div class="modern-card" *ngFor="let item of myInterests()" (click)="viewDetails(item)" style="cursor: pointer;">
                 <div class="card-img-top">
-                  <img *ngIf="item.imageUrl" [src]="item.imageUrl" alt="Don">
+                  <img *ngIf="item.imageUrl" [src]="item.imageUrl" alt="Don" (click)="openZoom(item.imageUrl, $event)">
                   <div *ngIf="!item.imageUrl" class="no-image-placeholder">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -855,7 +1051,7 @@
             <div class="premium-grid">
               <div class="detail-gallery">
                 <div class="main-image-container">
-                  <img *ngIf="selectedItem()?.imageUrl" [src]="selectedItem()?.imageUrl" alt="Objet">
+                  <img *ngIf="selectedItem()?.imageUrl" [src]="selectedItem()?.imageUrl" alt="Objet" (click)="openZoom(selectedItem()?.imageUrl, $event)" style="cursor: zoom-in;">
                   <div *ngIf="!selectedItem()?.imageUrl" class="image-placeholder-premium">
                     <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -892,7 +1088,7 @@
 
                 <div class="premium-action-card">
                   <div class="donor-profile-minimal">
-                    <div class="donor-avatar-premium">
+                    <div class="donor-avatar-premium" [class.is-admin-avatar]="selectedItem()?.user?.roles?.includes('ADMIN')" [style.background-color]="selectedItem()?.user?.avatarColor || '#3b82f6'">
                       {{ selectedItem()?.user?.name?.charAt(0) }}
                     </div>
                     <div class="donor-meta">
@@ -903,7 +1099,7 @@
                   
                   <button class="btn-request-premium" 
                           (click)="requestItem()" 
-                          [disabled]="selectedItem()?.status !== 'AVAILABLE'"
+                          [disabled]="selectedItem()?.status !== 'AVAILABLE' && !isInterested(selectedItem()?.id)"
                           [class.interested]="isInterested(selectedItem()?.id)">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -933,12 +1129,19 @@
                     </div>
 
                     <div *ngFor="let comment of comments(); let i = index" class="comment-card-premium">
-                      <div class="user-avatar-comment" [ngClass]="'avatar-bg-' + ((i % 6) + 1)">
+                      <div class="user-avatar-comment" [class.is-admin-avatar]="comment.author?.roles?.includes('ADMIN')" [style.background-color]="comment.author?.avatarColor || '#3b82f6'">
                         {{ comment.author?.name?.charAt(0) }}
                       </div>
                       <div class="comment-body-premium">
                         <div class="comment-user-row">
-                          <h5>{{ comment.author?.name }}</h5>
+                          <div class="user-name-wrapper">
+                            <h5>{{ comment.author?.name }}</h5>
+                            <span *ngIf="comment.author?.roles?.includes('ADMIN')" class="verified-badge" title="Compte Vérifié">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/>
+                              </svg>
+                            </span>
+                          </div>
                           <span class="comment-time">{{ comment.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
                         </div>
                         <p class="comment-message">{{ comment.text }}</p>
@@ -997,4 +1200,35 @@
     </div>
   </div>
 
+  <!-- Custom Admin Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showAdminConfirmModal()" (click)="closeAdminModal()" style="z-index: 9999;">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header-icon danger">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div class="modal-body text-center" style="text-align: center;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem;">{{ adminModalConfig()?.title }}</h3>
+        <p style="color: #64748b; line-height: 1.6; font-size: 0.95rem;">{{ adminModalConfig()?.message }}</p>
+      </div>
+      <div class="modal-footer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem;">
+        <button (click)="closeAdminModal()" class="btn-cancel" style="padding: 0.75rem 1rem; border-radius: 0.75rem; font-weight: 700; border: none; background: #f1f5f9; color: #475569; cursor: pointer;">Annuler</button>
+        <button (click)="confirmAdminAction()" class="btn-confirm-danger" style="padding: 0.75rem 1rem; border-radius: 0.75rem; font-weight: 700; border: none; background: #dc2626; color: white; cursor: pointer;">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Zoom Lightbox -->
+  <div class="image-lightbox" *ngIf="zoomedImage()" (click)="closeZoom()">
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <button class="close-lightbox" (click)="closeZoom()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <img [src]="zoomedImage()" alt="Zoomed image">
+    </div>
+  </div>
 </div>

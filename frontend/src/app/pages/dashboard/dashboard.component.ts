@@ -7,6 +7,8 @@ import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { Router, RouterModule } from '@angular/router';
 import { NotificationService as AppNotificationService } from '../../services/notification.service';
+import { AdminService } from '../../services/admin.service';
+import { AiService } from '../../services/ai.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -41,13 +43,20 @@ export class DashboardComponent implements OnInit {
   profileName = signal<string>('');
   profileEmail = signal<string>('');
   profileCity = signal<string>('');
+  profileAvatarColor = signal<string>('#059669'); // Default green
   profileSaved = signal<boolean>(false);
   profileError = signal<string>('');
+
+  avatarPalette = [
+    '#059669', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444', 
+    '#06b6d4', '#10b981', '#6366f1', '#a855f7', '#14b8a6', '#f97316'
+  ];
 
   // Draft signals for editing (decoupled from live display)
   draftName = signal<string>('');
   draftEmail = signal<string>('');
   draftCity = signal<string>('');
+  draftAvatarColor = signal<string>('#059669');
   showCityDropdown = signal<boolean>(false);
   showPublishCityDropdown = signal<boolean>(false);
   showFilterCityDropdown = signal<boolean>(false);
@@ -64,6 +73,9 @@ export class DashboardComponent implements OnInit {
   showNotificationDropdown = signal<boolean>(false);
   bellWasOpened = signal<boolean>(false);
   shouldBellRing = computed(() => this.unreadNotificationsCount() > 0 && !this.bellWasOpened());
+  
+  // Image Zoom
+  zoomedImage = signal<string | null>(null);
 
   // City Search/Suggestion signals
   registerCityQuery = signal<string>('');
@@ -114,12 +126,96 @@ export class DashboardComponent implements OnInit {
   filterForm: FormGroup;
   itemForm: FormGroup;
 
+  adminUsers = signal<any[]>([]);
+  adminItems = signal<any[]>([]);
+  adminStats = computed(() => {
+    const categories = this.items().reduce((acc: any, item) => {
+      acc[item.category] = (acc[item.category] || 0) + 1;
+      return acc;
+    }, {});
+    return {
+      totalUsers: this.adminUsers().length,
+      totalItems: this.items().length,
+      availableItems: this.items().filter(i => i.status === 'AVAILABLE').length,
+      givenItems: this.items().filter(i => i.status === 'GIVEN').length,
+      topCategory: Object.entries(categories).sort((a: any, b: any) => b[1] - a[1])[0]?.[0] || 'N/A'
+    };
+  });
+
+  // Admin Management Signals
+  adminUserSearch = signal<string>('');
+  adminItemSearch = signal<string>('');
+  adminUserPage = signal<number>(1);
+  adminItemPage = signal<number>(1);
+  adminPageSize = 8;
+
+  // Admin Computed: Filtered & Paginated Lists
+  filteredAdminUsers = computed(() => {
+    return this.adminUsers().filter(u => 
+      u.name?.toLowerCase().includes(this.adminUserSearch().toLowerCase()) ||
+      u.email?.toLowerCase().includes(this.adminUserSearch().toLowerCase())
+    );
+  });
+
+  paginatedAdminUsers = computed(() => {
+    const start = (this.adminUserPage() - 1) * this.adminPageSize;
+    return this.filteredAdminUsers().slice(start, start + this.adminPageSize);
+  });
+
+  adminUserTotalPages = computed(() => Math.ceil(this.filteredAdminUsers().length / this.adminPageSize) || 1);
+
+  filteredAdminItems = computed(() => {
+    return this.adminItems().filter(i => 
+      i.title?.toLowerCase().includes(this.adminItemSearch().toLowerCase()) ||
+      i.category?.toLowerCase().includes(this.adminItemSearch().toLowerCase())
+    );
+  });
+
+  paginatedAdminItems = computed(() => {
+    const start = (this.adminItemPage() - 1) * this.adminPageSize;
+    return this.filteredAdminItems().slice(start, start + this.adminPageSize);
+  });
+
+  adminItemTotalPages = computed(() => Math.ceil(this.filteredAdminItems().length / this.adminPageSize) || 1);
+
+  // Admin Stats Visuals (Pure SVG / CSS Charts)
+  statusDistribution = computed(() => {
+    const items = this.adminItems();
+    const dist = [
+      { label: 'Disponible', count: items.filter(i => i.status === 'AVAILABLE').length, color: '#10b981' },
+      { label: 'Réservé', count: items.filter(i => i.status === 'RESERVED').length, color: '#f59e0b' },
+      { label: 'Donné', count: items.filter(i => i.status === 'GIVEN').length, color: '#64748b' }
+    ];
+    const max = Math.max(...dist.map(d => d.count), 1);
+    return dist.map(d => ({ ...d, percent: (d.count / max) * 100 }));
+  });
+
+  categoryDistribution = computed(() => {
+    const items = this.adminItems();
+    const cats = items.reduce((acc: any, item) => {
+      acc[item.category] = (acc[item.category] || 0) + 1;
+      return acc;
+    }, {});
+    const sorted = Object.entries(cats)
+      .map(([label, count]: any) => ({ label, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+    const max = Math.max(...sorted.map(s => s.count), 1);
+    return sorted.map(s => ({ ...s, percent: (s.count / max) * 100 }));
+  });
+
+  // Modal for admin
+  showAdminConfirmModal = signal<boolean>(false);
+  adminModalConfig = signal<{ title: string, message: string, action: () => void } | null>(null);
+
   constructor(
     private fb: FormBuilder,
     private itemService: DonationItemService,
-    private authService: AuthService,
+    public authService: AuthService,
     private userService: UserService,
     private notificationService: AppNotificationService,
+    private adminService: AdminService,
+    private aiService: AiService,
     private router: Router
   ) {
     this.filterForm = this.fb.group({ search: [''], category: [''], city: [''] });
@@ -139,6 +235,11 @@ export class DashboardComponent implements OnInit {
         this.selectedCity.set(city);
       }
     });
+  }
+
+  openAssistant(): void {
+    this.aiService.triggerChat();
+    this.isSidebarOpen.set(false); // Close sidebar on mobile if open
   }
 
   @HostListener('document:click', ['$event'])
@@ -169,22 +270,25 @@ export class DashboardComponent implements OnInit {
       this.profileName.set(user.name || '');
       this.profileEmail.set(user.email || '');
       this.profileCity.set(user.city || '');
-      // Initialize drafts from actual profile
-      this.draftName.set(user.name || '');
-      this.draftEmail.set(user.email || '');
-      this.draftCity.set(user.city || '');
+      this.profileAvatarColor.set((user as any).avatarColor || '#059669');
+      this.draftName.set(this.profileName());
+      this.draftEmail.set(this.profileEmail());
+      this.draftCity.set(this.profileCity());
+      this.draftAvatarColor.set(this.profileAvatarColor());
     }
   }
 
   toggleSidebar(): void { this.isSidebarOpen.update(v => !v); }
 
   setView(view: string): void {
-    this.isSidebarOpen.set(false);
     this.activeView.set(view);
-    this.successMessage.set('');
-    this.errorMessage.set('');
-    if (view === 'mes-interets') {
+    this.isSidebarOpen.set(false);
+    if (view === 'mes-dons') {
+      this.itemService.getAllItems().subscribe(data => this.items.set(data));
+    } else if (view === 'mes-interets') {
       this.loadMyInterests();
+    } else if (view === 'admin') {
+      this.loadAdminData();
     }
   }
 
@@ -295,16 +399,86 @@ export class DashboardComponent implements OnInit {
     return status;
   }
 
+  selectAvatarColor(color: string): void {
+    console.log('Selecting avatar color:', color);
+    this.draftAvatarColor.set(color);
+    
+    // --- INSTANT STANDARDIZATION (Live Sync) ---
+    // Update the header avatar and other profile-dependent views immediately
+    this.profileAvatarColor.set(color);
+
+    // Update the color in the current items list for all items owned by the user
+    // This allows the user to see the change everywhere AS they click
+    const userId = this.authService.currentUser()?.id;
+    if (userId) {
+      const currentItems = this.items();
+      const updatedItems = currentItems.map(item => {
+        if (item.user && item.user.id === userId) {
+          return { ...item, user: { ...item.user, avatarColor: color } };
+        }
+        return item;
+      });
+      this.items.set(updatedItems);
+
+      // Also update selected item if open
+      const selected = this.selectedItem();
+      if (selected && selected.user && selected.user.id === userId) {
+        this.selectedItem.set({ ...selected, user: { ...selected.user, avatarColor: color } });
+      }
+
+      // Update comments if they are currently visible
+      const currentComments = this.comments();
+      if (currentComments.length > 0) {
+        const updatedComments = currentComments.map(c => {
+          if (c.author && c.author.id === userId) {
+            return { ...c, author: { ...c.author, avatarColor: color } };
+          }
+          return c;
+        });
+        this.comments.set(updatedComments);
+      }
+    }
+  }
+
   updateProfile(): void {
     this.profileError.set('');
-    this.userService.updateMyProfile({ name: this.draftName(), email: this.draftEmail(), city: this.draftCity() }).subscribe({
+    const updateData = { 
+      name: this.draftName(), 
+      email: this.draftEmail(), 
+      city: this.draftCity(),
+      avatarColor: this.draftAvatarColor() 
+    };
+    this.userService.updateMyProfile(updateData).subscribe({
       next: (updatedUser: any) => {
+        // Update local storage and auth state
         localStorage.setItem('user', JSON.stringify(updatedUser));
         this.authService.currentUser.set(updatedUser);
-        // Commit drafts to real signals
-        this.profileName.set(this.draftName());
-        this.profileEmail.set(this.draftEmail());
-        this.profileCity.set(this.draftCity());
+        
+        // Sync committed signals
+        this.profileName.set(updatedUser.name);
+        this.profileEmail.set(updatedUser.email);
+        this.profileCity.set(updatedUser.city);
+        this.profileAvatarColor.set(updatedUser.avatarColor);
+        
+        // --- STANDARDIZATION : Update local items list ---
+        const userId = updatedUser.id;
+        const currentItems = this.items();
+        const updatedItems = currentItems.map(item => {
+          if (item.user && item.user.id === userId) {
+            const newUser = { ...item.user, avatarColor: updatedUser.avatarColor, name: updatedUser.name };
+            return { ...item, user: newUser };
+          }
+          return item;
+        });
+        this.items.set(updatedItems);
+
+        // Update selected item if it's currently open in details
+        const selected = this.selectedItem();
+        if (selected && selected.user && selected.user.id === userId) {
+          const updatedUserObj = { ...selected.user, avatarColor: updatedUser.avatarColor, name: updatedUser.name };
+          this.selectedItem.set({ ...selected, user: updatedUserObj });
+        }
+        
         this.profileSaved.set(true);
         setTimeout(() => this.profileSaved.set(false), 3000);
       },
@@ -317,6 +491,7 @@ export class DashboardComponent implements OnInit {
     this.draftName.set(this.profileName());
     this.draftEmail.set(this.profileEmail());
     this.draftCity.set(this.profileCity());
+    this.draftAvatarColor.set(this.profileAvatarColor());
     this.profileError.set('');
     this.profileSaved.set(false);
   }
@@ -458,14 +633,77 @@ export class DashboardComponent implements OnInit {
   toggleNotifications(): void {
     console.log('Toggle notifications called. Current state:', this.showNotificationDropdown());
     this.showNotificationDropdown.update(v => !v);
+  }
+
+  // --- Admin Methods ---
+  loadAdminData(): void {
+    this.isLoading.set(true);
+    this.adminService.getAllUsers().subscribe({
+      next: (data) => this.adminUsers.set(data),
+      error: (err) => console.error(err)
+    });
+    this.adminService.getAllItems().subscribe({
+      next: (data) => {
+        this.adminItems.set(data);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  openAdminConfirmModal(title: string, message: string, action: () => void): void {
+    this.adminModalConfig.set({ title, message, action });
+    this.showAdminConfirmModal.set(true);
+  }
+
+  closeAdminModal(): void {
+    this.showAdminConfirmModal.set(false);
+  }
+
+  confirmAdminAction(): void {
+    if (this.adminModalConfig()) {
+      this.adminModalConfig()?.action();
+      this.closeAdminModal();
+    }
+  }
+
+  setAdminUserPage(page: number): void {
+    if (page >= 1 && page <= this.adminUserTotalPages()) {
+      this.adminUserPage.set(page);
+    }
+  }
+
+  setAdminItemPage(page: number): void {
+    if (page >= 1 && page <= this.adminItemTotalPages()) {
+      this.adminItemPage.set(page);
+    }
+  }
+
+  deleteUserAsAdmin(id: number): void {
+    this.openAdminConfirmModal(
+      'Supprimer l\'utilisateur',
+      'Cette action est irréversible. Toutes les données de cet utilisateur seront supprimées.',
+      () => this.adminService.deleteUser(id).subscribe(() => this.loadAdminData())
+    );
+  }
+
+  deleteItemAsAdmin(id: number): void {
+    this.openAdminConfirmModal(
+      'Supprimer le don',
+      'Êtes-vous sûr de vouloir retirer cet objet de la plateforme ?',
+      () => this.adminService.deleteItem(id).subscribe(() => this.loadAdminData())
+    );
+  }
+
+  markNotificationAsRead(notif: any): void {
     if (this.showNotificationDropdown()) {
       this.bellWasOpened.set(true);
       this.showCityDropdown.set(false);
       this.showFilterCityDropdown.set(false);
     }
-  }
-
-  markNotificationAsRead(notif: any): void {
     console.log('Clicking notification:', notif);
     
     if (!notif.read) {
@@ -526,7 +764,10 @@ export class DashboardComponent implements OnInit {
   getNotificationActionText(notif: any): string {
     if (notif.type === 'COMMENT') return 'a commenté votre don.';
     if (notif.type === 'INTEREST') return 'est intéressé(e) par votre don.';
-    return 'a interagi avec vous.';
+    if (notif.message && notif.actor && notif.message.includes(notif.actor.name)) {
+      return notif.message.replace(notif.actor.name, '').trim();
+    }
+    return notif.message || 'a interagi avec vous.';
   }
 
   getRelativeTime(dateStr: string): string {
@@ -544,5 +785,17 @@ export class DashboardComponent implements OnInit {
     if (diffInDays < 7) return `Il y a ${diffInDays} j`;
     
     return date.toLocaleDateString();
+  }
+
+  // --- Image Zoom Methods ---
+  openZoom(imageUrl: string | undefined, event: Event) {
+    if (imageUrl) {
+      event.stopPropagation();
+      this.zoomedImage.set(imageUrl);
+    }
+  }
+
+  closeZoom() {
+    this.zoomedImage.set(null);
   }
 }

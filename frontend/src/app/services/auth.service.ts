@@ -13,6 +13,7 @@ export class AuthService {
   token = signal<string | null>(localStorage.getItem('token'));
 
   isAuthenticated = computed(() => !!this.token());
+  isAdmin = computed(() => this.currentUser()?.roles?.includes('ADMIN'));
 
   constructor(private http: HttpClient) {
     const savedUser = localStorage.getItem('user');

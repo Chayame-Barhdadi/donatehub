@@ -43,7 +43,7 @@ public class InterestController {
 
         var existing = interestRepository.findByUserIdAndItemId(user.getId(), itemId);
         if (existing.isPresent()) {
-            interestRepository.delete(existing.get());
+            interestRepository.deleteByUserIdAndItemId(user.getId(), itemId);
             return ResponseEntity.ok(java.util.Map.of("message", "Intérêt retiré."));
         } else {
             ItemInterest interest = new ItemInterest();

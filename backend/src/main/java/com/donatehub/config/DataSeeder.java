@@ -29,30 +29,38 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (userRepository.count() == 0) {
             seedData();
+        } else if (userRepository.findByEmail("admin@donatehub.com").isEmpty()) {
+            User admin = new User(null, "Administrateur", "admin@donatehub.com", "Rabat", passwordEncoder.encode("password123"));
+            admin.getRoles().add(Role.USER);
+            admin.getRoles().add(Role.ADMIN);
+            admin.setAvatarColor("#059669");
+            userRepository.save(admin);
+            System.out.println("Official admin account created!");
         }
     }
 
     private void seedData() {
-        // Create Users
-        User user1 = new User(null, "Alice", "alice@example.com", "Casablanca", passwordEncoder.encode("password123"));
+        User user1 = new User(null, "Utilisateur Test", "user@example.com", "Casablanca", passwordEncoder.encode("password123"));
         user1.getRoles().add(Role.USER);
+        user1.setAvatarColor("#3b82f6"); // Blue
 
-        User user2 = new User(null, "Bob", "bob@example.com", "Rabat", passwordEncoder.encode("password123"));
-        user2.getRoles().add(Role.USER);
-        user2.getRoles().add(Role.ADMIN);
+        User admin = new User(null, "Administrateur", "admin@donatehub.com", "Rabat", passwordEncoder.encode("password123"));
+        admin.getRoles().add(Role.USER);
+        admin.getRoles().add(Role.ADMIN);
+        admin.setAvatarColor("#059669"); // Green
         
-        userRepository.saveAll(Arrays.asList(user1, user2));
+        userRepository.saveAll(Arrays.asList(user1, admin));
 
         // Create Items for Alice
         DonationItem item1 = new DonationItem(null, "Vieux Canapé", "Canapé en bon état, un peu usé.", "Meubles", "Casablanca", ItemStatus.AVAILABLE, "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=400", user1);
         DonationItem item2 = new DonationItem(null, "Livre Java", "Livre pour apprendre Spring Boot.", "Livres", "Rabat", ItemStatus.RESERVED, "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=400", user1);
 
         // Create Items for Bob
-        DonationItem item3 = new DonationItem(null, "Vélo enfant", "Vélo bleu pour enfant de 5-7 ans.", "Sport", "Marrakech", ItemStatus.AVAILABLE, "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&q=80&w=400", user2);
-        DonationItem item4 = new DonationItem(null, "Lampe vintage", "Lampe de bureau des années 70.", "Décoration", "Tanger", ItemStatus.GIVEN, "https://images.unsplash.com/photo-1507473884658-c70b6559b362?auto=format&fit=crop&q=80&w=400", user2);
+        DonationItem item3 = new DonationItem(null, "Vélo enfant", "Vélo bleu pour enfant de 5-7 ans.", "Sport", "Marrakech", ItemStatus.AVAILABLE, "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&q=80&w=400", admin);
+        DonationItem item4 = new DonationItem(null, "Lampe vintage", "Lampe de bureau des années 70.", "Décoration", "Tanger", ItemStatus.GIVEN, "https://images.unsplash.com/photo-1507473884658-c70b6559b362?auto=format&fit=crop&q=80&w=400", admin);
 
         DonationItem item5 = new DonationItem(null, "T-shirt Coton", "T-shirt en coton bio.", "Vêtements", "Fès", ItemStatus.AVAILABLE, "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&q=80&w=400", user1);
-        DonationItem item6 = new DonationItem(null, "Micro-ondes", "Micro-ondes presque neuf.", "Électronique", "Agadir", ItemStatus.AVAILABLE, "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?auto=format&fit=crop&q=80&w=400", user2);
+        DonationItem item6 = new DonationItem(null, "Micro-ondes", "Micro-ondes presque neuf.", "Électronique", "Agadir", ItemStatus.AVAILABLE, "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?auto=format&fit=crop&q=80&w=400", admin);
 
         itemRepository.saveAll(Arrays.asList(item1, item2, item3, item4, item5, item6));
 

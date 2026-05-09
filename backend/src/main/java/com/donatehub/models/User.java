@@ -23,6 +23,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    private String avatarColor;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
@@ -56,4 +58,6 @@ public class User {
     public void setRoles(java.util.Set<Role> roles) { this.roles = roles; }
     public List<DonationItem> getItems() { return items; }
     public void setItems(List<DonationItem> items) { this.items = items; }
+    public String getAvatarColor() { return avatarColor; }
+    public void setAvatarColor(String avatarColor) { this.avatarColor = avatarColor; }
 }

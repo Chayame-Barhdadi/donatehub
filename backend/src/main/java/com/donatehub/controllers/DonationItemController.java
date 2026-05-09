@@ -74,8 +74,22 @@ public class DonationItemController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
-        itemService.deleteItem(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deleteItem(@PathVariable Long id, java.security.Principal principal) {
+        if (principal == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        
+        com.donatehub.models.User user = userRepository.findByEmail(principal.getName()).orElse(null);
+        DonationItem item = itemService.getItemById(id);
+        
+        if (item == null) return ResponseEntity.notFound().build();
+        
+        boolean isOwner = item.getUser().getId().equals(user.getId());
+        boolean isAdmin = user.getRoles().contains(com.donatehub.models.Role.ADMIN);
+        
+        if (isOwner || isAdmin) {
+            itemService.deleteItem(id);
+            return ResponseEntity.noContent().build();
+        }
+        
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 }

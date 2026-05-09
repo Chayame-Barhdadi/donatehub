@@ -51,6 +51,9 @@ public class UserService {
             }
             user.setEmail(updatedData.getEmail());
         }
+        if (updatedData.getAvatarColor() != null) {
+            user.setAvatarColor(updatedData.getAvatarColor());
+        }
         return userRepository.save(user);
     }
 
