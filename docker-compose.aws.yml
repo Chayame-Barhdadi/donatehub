@@ -1,0 +1,36 @@
+services:
+
+  # ─── Spring Boot Backend ───────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: donatehub-backend
+    restart: always
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: aws
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    volumes:
+      - ./backend/uploads:/app/uploads
+
+  # ─── FastAPI AI Assistant ───────────────────────────
+  ai-assistant:
+    build:
+      context: ./ai-assistant
+      dockerfile: Dockerfile
+    container_name: donatehub-ai-assistant
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=DonateHub AI Assistant
+      - DEBUG=False
+    volumes:
+      - huggingface_cache:/root/.cache/huggingface
+
+volumes:
+  huggingface_cache:

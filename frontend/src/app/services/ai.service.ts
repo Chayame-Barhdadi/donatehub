@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface AiChatRequest {
   message: string;
@@ -25,7 +26,7 @@ export interface AiChatResponse {
   providedIn: 'root'
 })
 export class AiService {
-  private apiUrl = '/api/ai';
+  private apiUrl = `${environment.apiBaseUrl}/api/ai`;
   private sessionId = Math.random().toString(36).substring(2, 15); // Auto-generate simple session ID
 
   // Subject pour ouvrir/fermer le chat depuis n'importe où

@@ -14,7 +14,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {
+    "http://localhost:4200",
+    "http://YOUR_EC2_ELASTIC_IP:8085",
+    "https://YOUR_CLOUDFRONT_ID.cloudfront.net"
+})
 public class AuthController {
 
     private final UserRepository userRepository;

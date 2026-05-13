@@ -13,7 +13,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {
+    "http://localhost:4200",
+    "http://YOUR_EC2_ELASTIC_IP:8085",
+    "https://YOUR_CLOUDFRONT_ID.cloudfront.net"
+})
 public class AdminController {
 
     private final AdminService adminService;

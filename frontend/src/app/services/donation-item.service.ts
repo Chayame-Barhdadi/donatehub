@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { DonationItem } from '../models/donation-item.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DonationItemService {
-  private apiUrl = '/api/items';
+  private apiUrl = `${environment.apiBaseUrl}/api/items`;
+  private baseUrl = `${environment.apiBaseUrl}`;
 
   constructor(private http: HttpClient) { }
 
@@ -54,10 +56,10 @@ export class DonationItemService {
   }
 
   toggleInterest(itemId: number): Observable<any> {
-    return this.http.post<any>(`/api/interests/item/${itemId}`, {});
+    return this.http.post<any>(`${this.baseUrl}/api/interests/item/${itemId}`, {});
   }
 
   getMyInterests(): Observable<DonationItem[]> {
-    return this.http.get<DonationItem[]>(`/api/interests/me`);
+    return this.http.get<DonationItem[]>(`${this.baseUrl}/api/interests/me`);
   }
 }
